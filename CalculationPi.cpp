@@ -15,23 +15,22 @@ void RemoveLeadingZero(string& a);
 
 int main()
 {
-	cout << "1. add\n2. minus\n3. multi\n4. divide" << endl;
-	cout << "Choose your mode:";
-	int mode;
-	cin >> mode;
-	if (mode != 1 && mode != 2 && mode != 3 &&	mode != 4){
-		cout << "Wrong number or word!!! Please be careful!!!" << endl;
-		return 0;
+	cout << "Enter your precision: ";
+	int size1;
+	cin >> size1;
+	string One = "1";
+	for (int i = 1; i <= size1; i++){
+		One += "0";
 	}
-	cout << "Enter two numbers: ";
-	string a, b;
-	cin >> a >> b;
-	switch (mode){
-		case 1: cout << add(a, b) << endl; break;
-		case 2: cout << minusnum(a, b) << endl; break;
-		case 3: cout << multi(a, b) << endl; break;
-		case 4: cout << dividenum(a, b) << endl; break;
-		}
+	string pi = "0";
+	for (int i = 0; ; i++){
+		string arr = dividenum(One, to_string(2*i + 1));
+		if (i % 2 == 0)
+			pi = add(pi, arr);
+		else
+			pi = minusnum(pi, arr);
+		cout << multi(pi, "4") << endl;
+	}
 	return 0;    
 }
 
@@ -113,11 +112,7 @@ string minusnum(string a, string b)
 		result.push_back(sum + '0');
 	}
 	reverse(result.begin(), result.end());
-	for (int k = 0; k < result.length(); k++){
-		if (result[k] - '0' != 0)
-			break;
-		result.erase(k,1);
-	}
+	RemoveLeadingZero(result);
 	return result;
 }
 
@@ -171,9 +166,9 @@ bool compare(string a, string b)
 
 void RemoveLeadingZero(string& a)
 {
-	while (1){
-		if (a[0] - '0' != 0)
-		break;
-		a.erase(0,1);
-	}
+	//while (1){
+		//if (a[0] - '0' != 0)
+		//break;
+		//a.erase(0,1);
+	//}
 }
