@@ -2,13 +2,10 @@
 
 Hello, GitHub!
 
-This is my first GitHub repository for learning.
+This is my first GitHub repository for learning, in which I'd like to share some interesting codes.
 
+# For you
 
-## It's grate to have a Markdonw.
+**Thank you for your watching!**
 
-### Isn't it?
-
-- Oh!
-- why
-- * hello!
+If you have any question or suggestion, welcome to chat with me!
