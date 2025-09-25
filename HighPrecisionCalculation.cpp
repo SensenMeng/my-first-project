@@ -8,18 +8,20 @@ using namespace std;
 string add(string a, string b);
 string multi(string a, string b);
 string sin_multi(string a, char b);
+string power(string a, string b);
 string minusnum(string a, string b); 
 string dividenum(string a, string b);
+string restnum(string a, string b);
 bool compare(string a, string b);
 void RemoveLeadingZero(string& a);
 
 int main()
 {
-	cout << "1. add\n2. minus\n3. multi\n4. divide" << endl;
+	cout << "1. add\n2. minus\n3. multi\n4. divide\n5. rest\n6. power" << endl;
 	cout << "Choose your mode:";
 	int mode;
 	cin >> mode;
-	if (mode != 1 && mode != 2 && mode != 3 &&	mode != 4){
+	if (mode != 1 && mode != 2 && mode != 3 &&	mode != 4 && mode !=5 && mode != 6){
 		cout << "Wrong number or word!!! Please be careful!!!" << endl;
 		return 0;
 	}
@@ -31,6 +33,8 @@ int main()
 		case 2: cout << minusnum(a, b) << endl; break;
 		case 3: cout << multi(a, b) << endl; break;
 		case 4: cout << dividenum(a, b) << endl; break;
+		case 5: cout << restnum(a, b) << endl; break;
+		case 6: cout << power(a, b) << endl; break;
 		}
 	return 0;    
 }
@@ -50,6 +54,15 @@ string add(string a, string b)
 		result.push_back((sum % 10) + '0');
 	}
 	reverse(result.begin(), result.end());
+	return result;
+}
+
+string power(string a, string b)
+{
+	string result = a, result1 = a;
+	for (int i = 1; i < stoi(b); i++){
+		result = multi(result, result1);
+	}
 	return result;
 }
 
@@ -149,6 +162,13 @@ string dividenum(string a, string b)
 			}
 		}
 	}
+	RemoveLeadingZero(result);
+	return result;
+}
+
+string restnum(string a, string b)
+{
+	string result = minusnum(a, multi(b, dividenum(a, b)));
 	RemoveLeadingZero(result);
 	return result;
 }
