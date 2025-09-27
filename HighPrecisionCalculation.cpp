@@ -110,6 +110,8 @@ string minusnum(string a, string b)
 {
 	RemoveLeadingZero(a);
 	RemoveLeadingZero(b);
+	if (a == b)
+	return "0";
 	if (!compare(a, b)) return '-' + minusnum(b, a);
 	string result = "";
 	int i = a.length() - 1, j = b.length() - 1, carry = 0, sum = 0;
@@ -169,6 +171,8 @@ string dividenum(string a, string b)
 string restnum(string a, string b)
 {
 	string result = minusnum(a, multi(b, dividenum(a, b)));
+	if (result == "0")
+	return "0";
 	RemoveLeadingZero(result);
 	return result;
 }
