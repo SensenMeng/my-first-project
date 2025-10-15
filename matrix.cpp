@@ -15,6 +15,7 @@ double det(const vector<vector<double>> & matrix);
 
 vector<vector<double>> accMa(const vector<vector<double>> & matrix);
 vector<vector<double>> inverMa(const vector<vector<double>> & matrix);
+int rankMa(const vector<vector<double>> & matrix);
 
 vector<vector<double>> addMa(const vector<vector<double>> & matrix1, const vector<vector<double>> & matrix2);
 vector<vector<double>> minusMa(const vector<vector<double>> & matrix1, const vector<vector<double>> & matrix2);
@@ -24,13 +25,20 @@ vector<vector<double>> multiMa(const vector<vector<double>> & matrix1, const vec
 
 vector<vector<double>> transMa(const vector<vector<double>> & matrix);
 
+void minusrow(vector<vector<double>> & matrix, int target, int sub, int k = 1);
+void minuscol(vector<vector<double>> & matrix, int target, int sub, int k = 1);
+void exrow(vector<vector<double>> & matrix, int a, int b);
+void excol(vector<vector<double>> & matrix, int a, int b);
+void multirow(vector<vector<double>> & matrix, int row, int k);
+void multicol(vector<vector<double>> & matrix, int column, int k);
+
 double fixZero(double value);
 
 int main()
 {
     cout << "1. det             2. inverse         3. add             4. minus\n";
     cout << "5. multi1          6. multi2          7. transform       8. accompany\n";
-    cout << "9. alg             10. originMinor    11. Minor\n";
+    cout << "9. alg             10. originMinor    11. minor          12. rank\n";
     int mode, k, row, column;
     vector<vector<double>> target1, target2;
     while (1)
@@ -87,6 +95,10 @@ int main()
                 cin >> row >> column;
                 cout << "----------------------------------------" << endl;
                 cout << Minor(target1, row, column) << endl;break;
+            case 12:
+                iMa(target1);
+                cout << "----------------------------------------" << endl;
+                cout << "rank: " << rankMa(target1) << endl;break;
             default:
                 cout << "Wrong number, please try again!" << endl;
         }
@@ -259,6 +271,81 @@ vector<vector<double>> transMa(const vector<vector<double>> & matrix)
         for (int j = 0; j < size(matrix[0]); j++)
             result[j][i] = matrix[i][j];
     return result;
+}
+
+int rankMa(const vector<vector<double>> & matrix)
+{
+    vector<vector<double>> matrix1 = matrix;
+    int noZeroRow = 0, totaltime = 0;
+    for(int i = 0; i < size(matrix1[0]); i++)
+    {
+        int time = 0;
+        for(int j = noZeroRow; j < size(matrix1); j++)
+            if(matrix1[j][i])
+            {
+                noZeroRow = j;
+                time++;
+                totaltime++;
+                break;
+            }
+        if (time == 0)
+            continue;
+        for(int j = noZeroRow + 1; j < size(matrix1); j++)
+        {
+            if(matrix1[j][i])
+                minusrow(matrix1, j, noZeroRow, matrix1[j][i]*1.0 / matrix1[noZeroRow][i]*1.0);
+        }
+        if (totaltime == size(matrix1))
+            break;
+        exrow(matrix1, totaltime, noZeroRow);
+    }
+    //oMa(matrix1);
+    int rank = 0;
+    for (int i = 0; i < size(matrix1); i++)
+        for(int j = 0; j < size(matrix1[0]); j++)
+            if(matrix1[i][j])
+            {
+                rank++;
+                break;
+            }
+    return rank;
+}
+
+void minusrow(vector<vector<double>> & matrix, int target, int sub, int k)
+{
+    for(int i = 0; i < size(matrix[0]); i++)
+        matrix[target][i] = matrix[target][i] - matrix[sub][i] * k;
+}
+
+void minuscol(vector<vector<double>> & matrix, int target, int sub, int k)
+{
+    for(int i = 0; i < size(matrix); i++)
+        matrix[i][target] = matrix[i][target] - matrix[i][sub] * k;
+}
+
+void exrow(vector<vector<double>> & matrix, int a, int b)
+{
+    for(int i = 0; i < size(matrix[0]); i++)
+        swap(matrix[a][i], matrix[b][i]);
+}
+
+void excol(vector<vector<double>> & matrix, int a, int b)
+{
+    for(int i = 0; i < matrix.size(); i++) 
+        swap(matrix[i][a], matrix[i][b]);
+    
+}
+
+void multirow(vector<vector<double>> & matrix, int row, int k)
+{
+    for(int i = 0; i < size(matrix[0]); i++)
+        matrix[row][i] = matrix[row][i] * k;
+}
+
+void multicol(vector<vector<double>> & matrix, int column, int k)
+{
+    for(int i = 0; i < size(matrix); i++)
+        matrix[i][column] = matrix[i][column] * k;
 }
 
 double fixZero(double value) 
