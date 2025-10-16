@@ -1,12 +1,14 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include <iomanip>
+//#include <iomanip>
 
 using namespace std;
 
 void iMa(vector<vector<double>> & matrix);
 void oMa(const vector<vector<double>> & matrix);
+
+vector<vector<double>> solve(const vector<vector<double>> & matrix);
 
 vector<vector<double>> originMinor(const vector<vector<double>> & matrix, int row, int column);
 double Minor(const vector<vector<double>> & matrix, int row, int column);
@@ -24,13 +26,15 @@ vector<vector<double>> multiMa(double k, const vector<vector<double>> & matrix);
 vector<vector<double>> multiMa(const vector<vector<double>> & matrix1, const vector<vector<double>> & matrix2);
 
 vector<vector<double>> transMa(const vector<vector<double>> & matrix);
+vector<vector<double>> stepize(const vector<vector<double>> & matrix);
+vector<vector<double>> rowSimplify(const vector<vector<double>> & matrix);
 
-void minusrow(vector<vector<double>> & matrix, int target, int sub, int k = 1);
-void minuscol(vector<vector<double>> & matrix, int target, int sub, int k = 1);
+void minusrow(vector<vector<double>> & matrix, int target, int sub, double k = 1);
+void minuscol(vector<vector<double>> & matrix, int target, int sub, double k = 1);
 void exrow(vector<vector<double>> & matrix, int a, int b);
 void excol(vector<vector<double>> & matrix, int a, int b);
-void multirow(vector<vector<double>> & matrix, int row, int k);
-void multicol(vector<vector<double>> & matrix, int column, int k);
+void multirow(vector<vector<double>> & matrix, int row, double k);
+void multicol(vector<vector<double>> & matrix, int column, double k);
 
 double fixZero(double value);
 
@@ -39,6 +43,7 @@ int main()
     cout << "1. det             2. inverse         3. add             4. minus\n";
     cout << "5. multi1          6. multi2          7. transform       8. accompany\n";
     cout << "9. alg             10. originMinor    11. minor          12. rank\n";
+    cout << "13. stepize        14. rowSimplify    15. solve\n";
     int mode, k, row, column;
     vector<vector<double>> target1, target2;
     while (1)
@@ -99,8 +104,17 @@ int main()
                 iMa(target1);
                 cout << "----------------------------------------" << endl;
                 cout << "rank: " << rankMa(target1) << endl;break;
+            case 13:
+                iMa(target1);
+                oMa(stepize(target1));break;
+            case 14:
+                iMa(target1);
+                oMa(rowSimplify(target1));break;
+            case 15:
+                iMa(target1);
+                oMa(solve(target1));break;
             default:
-                cout << "Wrong number, please try again!" << endl;
+                cout << "Wrong number, please try again!" << endl;break;
         }
     }
     return 0;
@@ -126,6 +140,16 @@ void oMa(const vector<vector<double>> & matrix)
             cout << *subpos << " ";
         cout << "\n";
     }
+}
+
+vector<vector<double>> solve(const vector<vector<double>> & matrix)
+{
+    vector<vector<double>> A, Ab, result;
+    Ab = rowSimplify(matrix);
+    A.resize(size(matrix), vector<double>(size(matrix[0]) - 1));
+    result.resize(size(matrix), vector<double>(1));
+    
+    return result;
 }
 
 vector<vector<double>> originMinor(const vector<vector<double>> & matrix, int row, int column)
@@ -273,32 +297,55 @@ vector<vector<double>> transMa(const vector<vector<double>> & matrix)
     return result;
 }
 
-int rankMa(const vector<vector<double>> & matrix)
+vector<vector<double>> stepize(const vector<vector<double>> & matrix)
 {
     vector<vector<double>> matrix1 = matrix;
-    int noZeroRow = 0, totaltime = 0;
-    for(int i = 0; i < size(matrix1[0]); i++)
+    int rows = size(matrix1), cols = size(matrix1[0]);
+    int pivotRow = 0;
+    for(int i = 0; i < cols; i++)
     {
-        int time = 0;
-        for(int j = noZeroRow; j < size(matrix1); j++)
-            if(matrix1[j][i])
+        int noZeroRow = -1;
+        for(int j = pivotRow; j < rows; j++)
+            if(fabs(matrix1[j][i]) > 1e-9)
             {
                 noZeroRow = j;
-                time++;
-                totaltime++;
                 break;
             }
-        if (time == 0)
+        if (noZeroRow == -1)
             continue;
-        for(int j = noZeroRow + 1; j < size(matrix1); j++)
+        multirow(matrix1, noZeroRow, 1.0 / matrix1[noZeroRow][i]);
+        exrow(matrix1, noZeroRow, pivotRow);
+        for(int j = pivotRow + 1; j < rows; j++)
         {
-            if(matrix1[j][i])
-                minusrow(matrix1, j, noZeroRow, matrix1[j][i]*1.0 / matrix1[noZeroRow][i]*1.0);
+            minusrow(matrix1, j, pivotRow, matrix1[j][i]);
         }
-        if (totaltime == size(matrix1))
-            break;
-        exrow(matrix1, totaltime, noZeroRow);
+        pivotRow++;
     }
+    return matrix1;
+}
+
+vector<vector<double>> rowSimplify(const vector<vector<double>> & matrix)
+{
+    vector<vector<double>> matrix1 = stepize(matrix);
+    int rank = rankMa(matrix);
+    for (int i = 0; i < rank - 1; i++)
+    {
+        int nextZeroCol = 0;
+        for(int j = 0; j < size(matrix1[0]); j++)
+            if(matrix1[i + 1][j])
+            {
+                nextZeroCol = j;
+                break;
+            }
+        for(int j = 0; j < i + 1; j++)
+            minusrow(matrix1, j, i + 1, matrix1[j][nextZeroCol]);
+    }
+    return matrix1;
+}
+
+int rankMa(const vector<vector<double>> & matrix)
+{
+    vector<vector<double>>matrix1 = stepize(matrix);
     //oMa(matrix1);
     int rank = 0;
     for (int i = 0; i < size(matrix1); i++)
@@ -311,16 +358,22 @@ int rankMa(const vector<vector<double>> & matrix)
     return rank;
 }
 
-void minusrow(vector<vector<double>> & matrix, int target, int sub, int k)
+void minusrow(vector<vector<double>> & matrix, int target, int sub, double k)
 {
     for(int i = 0; i < size(matrix[0]); i++)
+    {
         matrix[target][i] = matrix[target][i] - matrix[sub][i] * k;
+        matrix[target][i] = fixZero(matrix[target][i]);
+    }
 }
 
-void minuscol(vector<vector<double>> & matrix, int target, int sub, int k)
+void minuscol(vector<vector<double>> & matrix, int target, int sub, double k)
 {
     for(int i = 0; i < size(matrix); i++)
+    {
         matrix[i][target] = matrix[i][target] - matrix[i][sub] * k;
+        matrix[i][target] = fixZero(matrix[i][target]);
+    }
 }
 
 void exrow(vector<vector<double>> & matrix, int a, int b)
@@ -336,16 +389,22 @@ void excol(vector<vector<double>> & matrix, int a, int b)
     
 }
 
-void multirow(vector<vector<double>> & matrix, int row, int k)
+void multirow(vector<vector<double>> & matrix, int row, double k)
 {
     for(int i = 0; i < size(matrix[0]); i++)
+    {
         matrix[row][i] = matrix[row][i] * k;
+        matrix[row][i] = fixZero(matrix[row][i]);
+    }
 }
 
-void multicol(vector<vector<double>> & matrix, int column, int k)
+void multicol(vector<vector<double>> & matrix, int column, double k)
 {
     for(int i = 0; i < size(matrix); i++)
+    {
         matrix[i][column] = matrix[i][column] * k;
+        matrix[i][column] = fixZero(matrix[i][column]);
+    }
 }
 
 double fixZero(double value) 
